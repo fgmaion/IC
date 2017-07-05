@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cmath>
-#include </home/francisco/Documents/Fisica/Mecflu_IC/Programas/Headers/GaussKernel.hpp>
-#include </home/francisco/Documents/Fisica/Mecflu_IC/Programas/Headers/Poiseulle_Particle.h>
-#include </home/francisco/Documents/Fisica/Mecflu_IC/Programas/Headers/Novo.hpp>
+#include </home/francisco/Documents/Fisica/IC-master/Programas/Headers/GaussKernel.hpp>
+#include </home/francisco/Documents/Fisica/IC-master/Programas/Headers/Poiseulle_Particle.h>
+#include </home/francisco/Documents/Fisica/IC-master/Programas/Headers/Novo.hpp>
 
 using namespace std;
 
@@ -16,7 +16,8 @@ double rho_0 = 10.0; //colocamos uma densidade alta para observar menos turbulen
 double v_0 = 0.1; //nao sei o que significa isso. Suponho que seja uma velocidade caracteristica
 //a qual queremos que seja baixa para minimizar turbulencia.
 long double m = 0.00444*rho_0*r_0*r_0;
-long double h = 1.4*sqrt(m/rho_0);
+//long double h = 1.4*sqrt(m/rho_0;
+long double h = 0.1;
 long double mu = 0.2*r_0*v_0*rho_0;
 double c = 2*v_0;
 long double lambda = -2*mu*v_0/(rho_0*r_0*r_0);
@@ -37,7 +38,7 @@ PS1->Init(h,dt,m,c,mu,lambda,rho_0);
 ofstream myfile10;
 {
 myfile10.open("/home/francisco/Documents/Fisica/Mecflu_IC/Programas/Imagens/Ibagens2/myfile10.txt");
-for(int i = 0; i <2000; i++)
+for(int i = 0; i <1000; i++)
 	{
 	PS1->Run(h,dt,m,c,mu,lambda,rho_0);
 	for (int l = 0; l<810; l++)

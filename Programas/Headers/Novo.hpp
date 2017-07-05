@@ -3,8 +3,8 @@
 
 #include <cmath>
 #include <math.h>
-#include </home/francisco/Documents/Fisica/Mecflu_IC/Programas/Headers/Poiseulle_Particle.h>
-#include </home/francisco/Documents/Fisica/Mecflu_IC/Programas/Headers/GaussKernel.hpp>
+#include </home/francisco/Documents/Fisica/IC-master/Programas/Headers/Poiseulle_Particle.h>
+#include </home/francisco/Documents/Fisica/IC-master/Programas/Headers/GaussKernel.hpp>
 #include <stdlib.h>
 
 class ParticleSystem
@@ -103,11 +103,11 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <=3 )
+	if( p1->cell_y <=20 )
 		{
 			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) )/2 );
 		}
-	if( p1->cell_y >=16 )
+	if( p1->cell_y >=0 )
 		{
 			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) )/2 );
 		}
@@ -119,89 +119,101 @@ for(int i = 0; i<810; i++)
 		Particle* p1 = &Particles[i];
 		long double A = 0;
 		long double B = 0;
-		for(int j = 0; j < PG1->size(p1->cell); j++)
+		for(int k = 0; k<360; k++)
 			{
-			long double distance = sqrt(pow( (p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0]),2)+pow((p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1]), 2));
-			if(p1->density*(*PG1)[p1->cell][j]->density*distance  == 0)
-			{}
-			else{
-					long double Xij = p1->x_t[0] - (*PG1)[p1->cell][j]->x_t[0];
-					long double Yij = p1->x_t[1] - (*PG1)[p1->cell][j]->x_t[1];
-					long double VXij = p1->velo_t[0] - (*PG1)[p1->cell][j]->velo_t[0];
-					long double VYij = p1->velo_t[1] - (*PG1)[p1->cell][j]->velo_t[1];
-					long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
-					long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
+			if(k == p1->cell || k == p1->cell - 18 || k == p1->cell+18)
+			{
+				for(int l = k-1; l<k+2; l++)
+				{
+				if(l<360 && l>0)
+				{
+				for(int j = 0; j < PG1->size(l); j++)
+					{
+					long double distance = sqrt(pow( (p1->x_t[0]-(*PG1)[l][j]->x_t[0]),2)+pow((p1->x_t[1]-(*PG1)[l][j]->x_t[1]), 2));
+					if(p1->density*(*PG1)[l][j]->density*distance  == 0)
+					{}
+					else{
+							long double Xij = p1->x_t[0] - (*PG1)[l][j]->x_t[0];
+							long double Yij = p1->x_t[1] - (*PG1)[l][j]->x_t[1];
+							long double VXij = p1->velo_t[0] - (*PG1)[l][j]->velo_t[0];
+							long double VYij = p1->velo_t[1] - (*PG1)[l][j]->velo_t[1];
+							long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
+							long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
 
-					A =
-					//Pressure
-					A - m*c*c*( ( ( p1->density
-					+ (*PG1)[p1->cell][j]->density ) /( p1->density*(*PG1)[p1->cell][j]->density*distance ) )
-					*D_Gauss_Kernel( Xij , Yij ,h )
-					* Xij  )
-					//Viscosity
-					- ( mu*m*m/ ( p1->density*(*PG1)[p1->cell][j]->density ) )*( p1->velo_t[0]
-					*D_Gauss_Kernel( Xij, Yij ,h )
-					*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*( Xij*Xij + Yij*Yij ) )
-					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
-					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
-					//Boundaries y over pressure
+							A =
+							//Pressure
+							A - m*c*c*( ( ( p1->density
+							+ (*PG1)[l][j]->density ) /( p1->density*(*PG1)[l][j]->density*distance ) )
+							*D_Gauss_Kernel( Xij , Yij ,h )
+							* Xij  )
+							//Viscosity
+						//	OVER HERE THERS SHIT
+							- ( mu*m*m/ ( p1->density*(*PG1)[l][j]->density ) )*( p1->velo_t[0]
+							*D_Gauss_Kernel( Xij, Yij ,h )
+							*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*( Xij*Xij + Yij*Yij ) )
+							*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
+							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
+							//Boundaries y over pressure
 
-					if( p1->cell_y <=3 )
-						{
-						A = A
-						//Density boundary over y
-						-( lambda/2 )*erf( T0i_1 )
-						//Viscosity boundary over y
-						-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
-						*( p1->velo_t[0]*exp(-T0i_1*T0i_1 ) );
+							if( p1->cell_y <=20 )
+								{
+								A = A
+								//Pressure boundary over y
+								+( lambda/2 )*erf( T0i_1 )
+								//Viscosity boundary over y
+								-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
+								*( p1->velo_t[0]*exp(-T0i_1*T0i_1 ) );
+								}
+							if( p1->cell_y >=0 )
+								{
+								A = A
+								//Pressure boundary over y
+								+( lambda/2 )*erf( T0i_2 )
+								//Viscosity boundary over y
+								-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
+								*( p1->velo_t[0]*exp(-T0i_2*T0i_2 ) );
+								}
+
+							B =
+							//pressure
+							B -m*c*c*( ( (p1->density
+							+(*PG1)[l][j]->density) /(p1->density*(*PG1)[l][j]->density*distance) )
+							*D_Gauss_Kernel( Xij , Yij ,h)
+							* Yij )
+							//Viscosity
+							- ( mu*m*m/ ( p1->density*(*PG1)[l][j]->density ) )*( p1->velo_t[1]
+							*D_Gauss_Kernel( Xij, Yij ,h )
+							*( 7/ (3*distance) ) + ( Yij*(Xij*VXij + Yij*VYij)/3 + VYij*(Xij*Xij + Yij*Yij ) )
+							*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
+							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
+
+
+							if( p1->cell_y <=20 )
+								{
+								B = B
+								//Pressure boundary over y
+								- 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_1 , 2 ) )/(sqrt(pi)*h)
+								//Viscosity Boundary over y
+								-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
+								*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_1*T0i_1 ) ;
+								}
+							if( p1->cell_y >=0 )
+								{
+								B = B
+								//Pressure boundary over y
+								+ 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_2 , 2 ) )/(sqrt(pi)*h)
+								//viscosity boundary over y
+								-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
+								*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_2*T0i_2 );
+								}
+
+							}
 						}
-					if( p1->cell_y >=16 )
-						{
-						A = A
-						//Density boundary over y
-						-( lambda/2 )*erf( T0i_2 )
-						//Viscosity boundary over y
-						-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
-						*( p1->velo_t[0]*exp(-T0i_2*T0i_2 ) );
-						}
-
-					B =
-					//pressure
-					B -m*c*c*( ( (p1->density
-					+(*PG1)[p1->cell][j]->density) /(p1->density*(*PG1)[p1->cell][j]->density*distance) )
-					*D_Gauss_Kernel( Xij , Yij ,h)
-					* Yij )
-					//Viscosity
-					- ( mu*m*m/ ( p1->density*(*PG1)[p1->cell][j]->density ) )*( p1->velo_t[1]
-					*D_Gauss_Kernel( Xij, Yij ,h )
-					*( 7/ (3*distance) ) + ( Yij*(Xij*VXij + Yij*VYij)/3 + VYij*(Xij*Xij + Yij*Yij ) )
-					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance )
-					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance ) ) );
-
-
-					if( p1->cell_y <=3 )
-						{
-						B = B
-						//Pressure boundary over y
-						- 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_1 , 2 ) )/(sqrt(pi)*h)
-						//Viscosity Boundary over y
-						-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
-						*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_1*T0i_1 ) ;
-						}
-					if( p1->cell_y >=16 )
-						{
-						B = B
-						//Pressure boundary over y
-						+ 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_2 , 2 ) )/(sqrt(pi)*h)
-						//viscosity boundary over y
-						-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
-						*( p1->velo_t[1] - p1->velo_t[1]/3 )*exp(-T0i_2*T0i_2 );
-						}
-
 					}
-
+				}
 			}
-		p1->a_t[0]=(A+0.5);
+		}
+		p1->a_t[0]=(A+2);
 		p1->a_t[1]=(B);
 		p1->velo_t[0] = (p1->velo_t[0] + p1->a_t[0]*dt/2);
 		p1->velo_t[1] = (p1->velo_t[1] + p1->a_t[1]*dt/2);
@@ -301,11 +313,11 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <=3 )
+	if( p1->cell_y <=20 )
 		{
 			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) )/2 );
 		}
-	if( p1->cell_y >=16 )
+	if( p1->cell_y >=0 )
 		{
 			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) )/2 );
 		}
@@ -317,90 +329,100 @@ for(int i = 0; i<810; i++)
 		Particle* p1 = &Particles[i];
 		long double A = 0;
 		long double B = 0;
-		for(int j = 0; j < PG1->size(p1->cell); j++)
+		for (int k = 0; k<360; k++)
+		{
+			if(k == p1->cell || k == p1->cell - 18 || k == p1->cell+18)
 			{
-			long double distance = sqrt(pow( (p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0]),2)+pow((p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1]), 2));
-			if(p1->density*(*PG1)[p1->cell][j]->density*distance  == 0)
-			{}
-			else{
+				for (int l = k-1; l <k+2; l++)
+				{
+					if(l<360 && l>0)
+					{
+					for(int j = 0; j < PG1->size(l); j++)
+					{
+					long double distance = sqrt( pow( (p1->x_t[0]-(*PG1)[l][j]->x_t[0]),2)+pow((p1->x_t[1]-(*PG1)[l][j]->x_t[1]), 2));
+					if(p1->density*(*PG1)[l][j]->density*distance  == 0)
+					{}
+					else{
 
-					long double Xij = p1->x_t[0] - (*PG1)[p1->cell][j]->x_t[0];
-					long double Yij = p1->x_t[1] - (*PG1)[p1->cell][j]->x_t[1];
-					long double VXij = p1->velo_t[0] - (*PG1)[p1->cell][j]->velo_t[0];
-					long double VYij = p1->velo_t[1] - (*PG1)[p1->cell][j]->velo_t[1];
-					long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
-					long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
+							long double Xij = p1->x_t[0] - (*PG1)[l][j]->x_t[0];
+							long double Yij = p1->x_t[1] - (*PG1)[l][j]->x_t[1];
+							long double VXij = p1->velo_t[0] - (*PG1)[l][j]->velo_t[0];
+							long double VYij = p1->velo_t[1] - (*PG1)[l][j]->velo_t[1];
+							long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
+							long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
 
-					A =
-					//Pressure
-					A - m*c*c*( ( ( p1->density
-					+ (*PG1)[p1->cell][j]->density ) /( p1->density*(*PG1)[p1->cell][j]->density*distance ) )
-					*D_Gauss_Kernel( Xij , Yij ,h )
-					* Xij  )
-					//Viscosity
-					- ( mu*m*m/ ( p1->density*(*PG1)[p1->cell][j]->density ) )*( p1->velo_t[0]
-					*D_Gauss_Kernel( Xij, Yij ,h )
-					*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*(Xij*Xij + Yij*Yij ) )
-					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance )
-					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance ) ) );
-					//Boundaries y over pressure
+							A =
+							//Pressure
+							A - m*c*c*( ( ( p1->density
+							+ (*PG1)[l][j]->density ) /( p1->density*(*PG1)[l][j]->density*distance ) )
+							*D_Gauss_Kernel( Xij , Yij ,h )
+							* Xij  )
+							//Viscosity
+							- ( mu*m*m/ ( p1->density*(*PG1)[l][j]->density ) )*( p1->velo_t[0]
+							*D_Gauss_Kernel( Xij, Yij ,h )
+							*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*(Xij*Xij + Yij*Yij ) )
+							*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
+							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
+							//Boundaries y over pressure
 
-					if( p1->cell_y <=3 )
-						{
-						A = A
-						//Density boundary over y
-						-( lambda/2 )*erf( T0i_1 )
-						//Viscosity boundary over y
-						-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
-						*( p1->velo_t[0]*exp(-T0i_1*T0i_1 ) );
+							if( p1->cell_y <=20 )
+								{
+								A = A
+								//Density boundary over y
+								+( lambda/2 )*erf( T0i_1 )
+								//Viscosity boundary over y
+								-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
+								*( p1->velo_t[0]*exp(-T0i_1*T0i_1 ) );
+								}
+							if( p1->cell_y >=0 )
+								{
+								A = A
+								//Density boundary over y
+								+( lambda/2 )*erf( T0i_2 )
+								//Viscosity boundary over y
+								-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
+								*( p1->velo_t[0]*exp(-T0i_2*T0i_2 ) );
+								}
+
+							B =
+							//pressure term
+							B -m*c*c*( ( (p1->density
+							+(*PG1)[l][j]->density) /(p1->density*(*PG1)[l][j]->density*distance) )
+							*D_Gauss_Kernel( Xij , Yij ,h)
+							* Yij )
+							//Viscosity term
+							- ( mu*m*m/ ( p1->density*(*PG1)[l][j]->density ) )*( p1->velo_t[1]
+							*D_Gauss_Kernel( Xij, Yij ,h )
+							*( 7/ (3*distance) ) + ( Yij*(Xij*VXij + Yij*VYij)/3 + VYij*(Xij*Xij + Yij*Yij ) )
+							*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
+							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
+
+
+							if( p1->cell_y <=20 )
+								{
+								B = B
+								//Pressure boundary over y
+								- 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_1 , 2 ) )/(sqrt(pi)*h)
+								//Viscosity Boundary over y
+								-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
+								*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_1*T0i_1 ) ;
+								}
+							if( p1->cell_y >=0 )
+								{
+								B = B
+								//Pressure boundary over y
+								+ 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_2 , 2 ) )/(sqrt(pi)*h)
+								//viscosity boundary over y
+								-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
+								*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_2*T0i_2 );
+								}
+							}
 						}
-					if( p1->cell_y >=16 )
-						{
-						A = A
-						//Density boundary over y
-						-( lambda/2 )*erf( T0i_2 )
-						//Viscosity boundary over y
-						-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
-						*( p1->velo_t[0]*exp(-T0i_2*T0i_2 ) );
-						}
-
-					B =
-					//pressure term
-					B -m*c*c*( ( (p1->density
-					+(*PG1)[p1->cell][j]->density) /(p1->density*(*PG1)[p1->cell][j]->density*distance) )
-					*D_Gauss_Kernel( Xij , Yij ,h)
-					* Yij )
-					//Viscosity term
-					- ( mu*m*m/ ( p1->density*(*PG1)[p1->cell][j]->density ) )*( p1->velo_t[1]
-					*D_Gauss_Kernel( Xij, Yij ,h )
-					*( 7/ (3*distance) ) + ( Yij*(Xij*VXij + Yij*VYij)/3 + VYij*(Xij*Xij + Yij*Yij ) )
-					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance )
-					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance ) ) );
-
-
-					if( p1->cell_y <=3 )
-						{
-						B = B
-						//Pressure boundary over y
-						- 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_1 , 2 ) )/(sqrt(pi)*h)
-						//Viscosity Boundary over y
-						-( mu*( 2*T0i_1*T0i_1 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_1 ) )
-						*( p1->velo_t[1] + p1->velo_t[1]/3 )*exp(-T0i_1*T0i_1 ) ;
-						}
-					if( p1->cell_y >=16 )
-						{
-						B = B
-						//Pressure boundary over y
-						+ 2*(p1->density*c*c/rho_0) * (p1->density*c*c/rho_0)*exp( - pow ( T0i_2 , 2 ) )/(sqrt(pi)*h)
-						//viscosity boundary over y
-						-( mu*( 2*T0i_2*T0i_2 + 1 ) / ( p1->density*sqrt(pi)*h*h*T0i_2 ) )
-						*( p1->velo_t[1] - p1->velo_t[1]/3 )*exp(-T0i_2*T0i_2 );
-						}
-
 					}
-
+					}
+				}
 			}
-		p1->a_t[0]=(A+0.5);
+		p1->a_t[0]=(A+2);
 		p1->a_t[1]=(B);
 		p1->x_t[0]=(p1->x_t[0] + p1->velo_t[0]*dt);
 		p1->x_t[1]=(p1->x_t[1] + p1->velo_t[1]*dt);
