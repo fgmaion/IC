@@ -9,11 +9,12 @@ double pi =3.141592653589793238462643383279;
 
 double Gauss_Kernel(double x, double y,double h)
 {
-double d  = sqrt(pow(x,2)+pow(y,2));
+double d  = sqrt( pow(x,2) + pow(y,2) );
 double A = exp(-d*d/(h*h))/(pi*h*h);
 return (A);
 }
 
+//Parece que ha um problema aqui abaixo.
 double D_Gauss_Kernel(double x, double y, double h)
 {
   double d  = sqrt(pow(x,2)+pow(y,2));

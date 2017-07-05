@@ -141,9 +141,9 @@ for(int i = 0; i<810; i++)
 					//Viscosity
 					- ( mu*m*m/ ( p1->density*(*PG1)[p1->cell][j]->density ) )*( p1->velo_t[0]
 					*D_Gauss_Kernel( Xij, Yij ,h )
-					*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*(Xij*Xij + Yij*Yij ) )
-					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance )
-					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance ) ) );
+					*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*( Xij*Xij + Yij*Yij ) )
+					*( -D_Gauss_Kernel(Xij, Yij, h ) / ( distance*distance*distance )
+					+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 					//Boundaries y over pressure
 
 					if( p1->cell_y <=3 )
