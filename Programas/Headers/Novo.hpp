@@ -16,9 +16,9 @@ class ParticleSystem
 
 		long double CalculateDensities(ParticleGrid*, long double);//Funcao calcula as densidades
 
-		void Init(long double, long double, long double, long double,long double,long double, double);
+		void Init(long double, long double, long double, long double,long double,long double, double, long double, long double);
 
-		void Run(long double, long double, long double, long double,long double,long double, double);
+		void Run(long double, long double, long double, long double,long double,long double, double, long double, long double);
 
 		Particle* Particles;
 
@@ -34,7 +34,7 @@ ParticleSystem::~ParticleSystem()
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
-void ParticleSystem::Init(long double h, long double dt, long double m, long double c, long double mu, long double lambda, double rho_0)
+void ParticleSystem::Init(long double h, long double dt, long double m, long double c, long double mu, long double lambda, double rho_0, long double v_0, long double r_0)
 {
 srand(time(NULL));
 
@@ -103,13 +103,13 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <=20 )
+	if( p1->cell_y <20 )
 		{
-			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) )/2 );
+			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) / h )/2 );
 		}
 	if( p1->cell_y >=0 )
 		{
-			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) )/2 );
+			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) / h )/2 );
 		}
 	}
 
@@ -125,7 +125,7 @@ for(int i = 0; i<810; i++)
 			{
 				for(int l = k-1; l<k+2; l++)
 				{
-				if(l<360 && l>0)
+				if(l<360 && l>=0)
 				{
 				for(int j = 0; j < PG1->size(l); j++)
 					{
@@ -155,7 +155,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 							//Boundaries y over pressure
 
-							if( p1->cell_y <=20 )
+							if( p1->cell_y <20 )
 								{
 								A = A
 								//Pressure boundary over y
@@ -188,7 +188,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 
 
-							if( p1->cell_y <=20 )
+							if( p1->cell_y <20 )
 								{
 								B = B
 								//Pressure boundary over y
@@ -213,7 +213,7 @@ for(int i = 0; i<810; i++)
 				}
 			}
 		}
-		p1->a_t[0]=(A+2);
+		p1->a_t[0]=(A+2*mu*v_0/(r_0*r_0));
 		p1->a_t[1]=(B);
 		p1->velo_t[0] = (p1->velo_t[0] + p1->a_t[0]*dt/2);
 		p1->velo_t[1] = (p1->velo_t[1] + p1->a_t[1]*dt/2);
@@ -243,7 +243,7 @@ for (int i =0; i < 810; i++)
 */
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
-void ParticleSystem::Run(long double h, long double dt, long double m, long double c, long double mu, long double lambda, double rho_0)
+void ParticleSystem::Run(long double h, long double dt, long double m, long double c, long double mu, long double lambda, double rho_0, long double v_0, long double r_0)
 {
 PG1->clear();
 
@@ -313,13 +313,13 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <=20 )
+	if( p1->cell_y <20 )
 		{
-			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) )/2 );
+			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) / h )/2 );
 		}
 	if( p1->cell_y >=0 )
 		{
-			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) )/2 );
+			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) / h )/2 );
 		}
 }
 
@@ -335,7 +335,7 @@ for(int i = 0; i<810; i++)
 			{
 				for (int l = k-1; l <k+2; l++)
 				{
-					if(l<360 && l>0)
+					if(l<360 && l>=0)
 					{
 					for(int j = 0; j < PG1->size(l); j++)
 					{
@@ -365,7 +365,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 							//Boundaries y over pressure
 
-							if( p1->cell_y <=20 )
+							if( p1->cell_y <20 )
 								{
 								A = A
 								//Density boundary over y
@@ -398,7 +398,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 
 
-							if( p1->cell_y <=20 )
+							if( p1->cell_y <20 )
 								{
 								B = B
 								//Pressure boundary over y
@@ -422,7 +422,7 @@ for(int i = 0; i<810; i++)
 					}
 				}
 			}
-		p1->a_t[0]=(A+2);
+		p1->a_t[0]=(A+2*mu*v_0/(r_0*r_0));
 		p1->a_t[1]=(B);
 		p1->x_t[0]=(p1->x_t[0] + p1->velo_t[0]*dt);
 		p1->x_t[1]=(p1->x_t[1] + p1->velo_t[1]*dt);
