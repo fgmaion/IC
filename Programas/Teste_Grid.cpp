@@ -12,7 +12,7 @@ using namespace std;
 int main()
 {
 double r_0 = 1;
-double rho_0 = 30.0; //colocamos uma densidade alta para observar menos turbulencia
+double rho_0 = 10; //colocamos uma densidade alta para observar menos turbulencia
 double v_0 = 0.01; //nao sei o que significa isso. Suponho que seja uma velocidade caracteristica
 //a qual queremos que seja baixa para minimizar turbulencia.
 long double m = 0.00444*rho_0*r_0*r_0;
@@ -22,7 +22,7 @@ long double mu = 0.2*r_0*v_0*rho_0;
 double c = 2*v_0;
 long double lambda = -2*mu*v_0/(rho_0*r_0*r_0);
 
-double dt = 0.005;
+double dt = 0.01;
 
 double xcell;
 double ycell;
@@ -30,8 +30,9 @@ int running;
 
 double Reynolds = rho_0*v_0*r_0/(mu);
 double p_gradient = 2*mu*v_0/(r_0*r_0);
+
 cout << " h " << h << "\n";
-cout << p_gradient << "\n";
+cout <<"Pressure Gradient" << p_gradient << "\n";
 cout << "Reynolds Number" << Reynolds;
 clock_t tStart = clock();
 ////////////////////////////////////////////////////////////////////////////////////////////
