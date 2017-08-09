@@ -38,28 +38,28 @@ void ParticleSystem::Init(long double h, long double dt, long double m, long dou
 {
 srand(time(NULL));
 
-Particles = new Particle[810];
-PG1 = new ParticleGrid(360,810);
-for (int i = 0; i<810; i++)
+Particles = new Particle[1000];
+PG1 = new ParticleGrid(1440,1000);
+for (int i = 0; i<1000; i++)
 {
 			Particle* p1 = &Particles[i];
 			p1->mass  = (m);
-			p1->x_t[0] = ((rand() % 18000)/10000.0);
-			p1->x_t[1] = ((rand() % 20000) /10000.0)-1;
-			p1->velo_t[0] = 0;
+			p1->x_t[0] = ((rand() % 18000)/10000.0)*r_0;
+			p1->x_t[1] = (((rand() % 20000) /10000.0)-1)*r_0;
+			p1->velo_t[0] = 0.1;
 			p1->velo_t[1] = 0;
 			p1->a_t[0] = 0;
 			p1->a_t[1] = 0;
 }
 
-for (int i=0; i<810; i++)
+for (int i=0; i<1000; i++)
 	{
 			Particle* p1 = &Particles[i];
 			//Cell distribution
-			int xcell = ((p1->x_t[0]) / 1.8)*18;
-			int ycell = ((p1->x_t[1] + 1 ) / 2)*20;
+			int xcell = ((p1->x_t[0]) / (1.8*r_0))*36;
+			int ycell = ((p1->x_t[1] + r_0 ) / (2*r_0))*40;
 
-			if(xcell < 18 && xcell >= 0)
+			if(xcell < 36 && xcell >= 0)
 			{
 				p1->cell_x = ( (int)(xcell) );
 			}
@@ -67,7 +67,7 @@ for (int i=0; i<810; i++)
 			{
 				if ( xcell > 0 )
 				{
-				p1->cell_x = 17;
+				p1->cell_x = 35;
 				}
 				else
 				{
@@ -75,7 +75,7 @@ for (int i=0; i<810; i++)
 				}
 			}
 
-			if(ycell < 20 && ycell >= 0)
+			if(ycell < 40 && ycell >= 0)
 			{
 			p1->cell_y = ( (int)(ycell) );
 			}
@@ -83,18 +83,18 @@ for (int i=0; i<810; i++)
 			{
 				if ( ycell > 0 )
 				{
-				p1->cell_y = 19;
+				p1->cell_y = 39;
 				}
 				else
 				{
 				p1->cell_y = 0;
 				}
 			}
-			p1->cell = (p1->cell_x + 18*p1->cell_y);
+			p1->cell = (p1->cell_x + 36*p1->cell_y);
 			PG1->push_back(p1->cell,p1);
 		}
 //densidade
-for (int i = 0; i<810; i++)
+for (int i = 0; i<1000; i++)
 	{
 	Particle* p1 = &Particles[i];
 	long double A = 0;
@@ -103,29 +103,29 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <20 )
+	if( p1->cell_y <40 )
 		{
-			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) / h )/2 );
+			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + r_0, 2) ) / h )/2 );
 		}
 	if( p1->cell_y >=0 )
 		{
-			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) / h )/2 );
+			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] - r_0, 2) ) / h )/2 );
 		}
 	}
 
 //accelerations
-for(int i = 0; i<810; i++)
+for(int i = 0; i<1000; i++)
 {
 		Particle* p1 = &Particles[i];
 		long double A = 0;
 		long double B = 0;
-		for(int k = 0; k<360; k++)
+		for(int k = 0; k<1440; k++)
 			{
-			if(k == p1->cell || k == p1->cell - 18 || k == p1->cell+18)
+			if(k == p1->cell || k == p1->cell - 36 || k == p1->cell+36)
 			{
 				for(int l = k-1; l<k+2; l++)
 				{
-				if(l<360 && l>=0)
+				if(l<1440 && l>=0)
 				{
 				for(int j = 0; j < PG1->size(l); j++)
 					{
@@ -137,8 +137,8 @@ for(int i = 0; i<810; i++)
 							long double Yij = p1->x_t[1] - (*PG1)[l][j]->x_t[1];
 							long double VXij = p1->velo_t[0] - (*PG1)[l][j]->velo_t[0];
 							long double VYij = p1->velo_t[1] - (*PG1)[l][j]->velo_t[1];
-							long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
-							long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
+							long double T0i_1 = sqrt( pow( p1->x_t[1] + r_0, 2) )/h;
+							long double T0i_2 = sqrt( pow( p1->x_t[1] - r_0, 2) )/h;
 
 							A =
 							//Pressure
@@ -147,7 +147,6 @@ for(int i = 0; i<810; i++)
 							*D_Gauss_Kernel( Xij , Yij ,h )
 							* Xij  )
 							//Viscosity
-						//	OVER HERE THERS SHIT
 							- ( mu*m*m/ ( p1->density*(*PG1)[l][j]->density ) )*( p1->velo_t[0]
 							*D_Gauss_Kernel( Xij, Yij ,h )
 							*( 7/ (3*distance) ) + ( Xij*(Xij*VXij + Yij*VYij)/3 + VXij*( Xij*Xij + Yij*Yij ) )
@@ -155,7 +154,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 							//Boundaries y over pressure
 
-							if( p1->cell_y <20 )
+							if( p1->cell_y <40 )
 								{
 								A = A
 								//Pressure boundary over y
@@ -188,7 +187,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 
 
-							if( p1->cell_y <20 )
+							if( p1->cell_y <40 )
 								{
 								B = B
 								//Pressure boundary over y
@@ -213,7 +212,7 @@ for(int i = 0; i<810; i++)
 				}
 			}
 		}
-		p1->a_t[0]=(A+0.1);
+		p1->a_t[0]=(A+(2*mu*v_0/(r_0*r_0)));
 		p1->a_t[1]=(B);
 		p1->velo_t[0] = (p1->velo_t[0] + p1->a_t[0]*dt/2);
 		p1->velo_t[1] = (p1->velo_t[1] + p1->a_t[1]*dt/2);
@@ -247,11 +246,11 @@ void ParticleSystem::Run(long double h, long double dt, long double m, long doub
 {
 PG1->clear();
 
-for (int i=0; i<810; i++)
+for (int i=0; i<1000; i++)
 	{
 			Particle* p1 = &Particles[i];
 //Boundaries x
-			if(p1->x_t[0] > 1.8)
+			if(p1->x_t[0] > 1.8*r_0)
 			{
 				if(p1->velo_t[0] > 0)
 				{
@@ -262,14 +261,14 @@ for (int i=0; i<810; i++)
 			{
 				if(p1->velo_t[0] < 0)
 				{
-					p1->x_t[0] = 1.8;
+					p1->x_t[0] = 1.8*r_0;
 				}
 			}
 			//Cell distribution
-			int xcell = ((p1->x_t[0]) / 1.8)*18;
-			int ycell = ((p1->x_t[1] + 1 ) / 2)*20;
+			int xcell = ((p1->x_t[0]) / (1.8*r_0))*36;
+			int ycell = ((p1->x_t[1] + r_0 ) / (2*r_0))*40;
 
-			if(xcell < 18 && xcell >= 0)
+			if(xcell < 36 && xcell >= 0)
 			{
 				p1->cell_x = ( (int)(xcell) );
 			}
@@ -277,7 +276,7 @@ for (int i=0; i<810; i++)
 			{
 				if ( xcell > 0 )
 				{
-				p1->cell_x = 17;
+				p1->cell_x = 35;
 				}
 				else
 				{
@@ -285,7 +284,7 @@ for (int i=0; i<810; i++)
 				}
 			}
 
-			if(ycell < 20 && ycell >= 0)
+			if(ycell < 40 && ycell >= 0)
 			{
 			p1->cell_y = ( (int)(ycell) );
 			}
@@ -293,18 +292,18 @@ for (int i=0; i<810; i++)
 			{
 				if ( ycell > 0 )
 				{
-				p1->cell_y = 19;
+				p1->cell_y = 39;
 				}
 				else
 				{
 				p1->cell_y = 0;
 				}
 			}
-			p1->cell = (p1->cell_x + 18*p1->cell_y);
+			p1->cell = (p1->cell_x + 36*p1->cell_y);
 			PG1->push_back(p1->cell,p1);
 		}
 //densidade
-for (int i = 0; i<810; i++)
+for (int i = 0; i<1000; i++)
 	{
 	Particle* p1 = &Particles[i];
 	long double A = 0;
@@ -313,29 +312,30 @@ for (int i = 0; i<810; i++)
 				A = A + m*Gauss_Kernel(p1->x_t[0]-(*PG1)[p1->cell][j]->x_t[0],p1->x_t[1]-(*PG1)[p1->cell][j]->x_t[1],h);
 		}
 //Boundaries y over density
-	if( p1->cell_y <20 )
+	if( p1->cell_y <40 )
 		{
-			p1->density = A / (1 - erf( sqrt( pow( p1->x_t[1] + 1, 2) ) / h )/2 );
+			A = A / (1 - erf( sqrt( pow( p1->x_t[1] + r_0, 2) ) / h )/2 );
 		}
 	if( p1->cell_y >=0 )
 		{
-			p1->density = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - 1, 2) ) / h )/2 );
+			A = A / ( 1 - erf( sqrt( pow( p1->x_t[1] - r_0, 2) ) / h )/2 );
 		}
+p1->density = A;
 }
 
 //accelerations
-for(int i = 0; i<810; i++)
+for(int i = 0; i<1000; i++)
 	{
 		Particle* p1 = &Particles[i];
 		long double A = 0;
 		long double B = 0;
-		for (int k = 0; k<360; k++)
+		for (int k = 0; k<1440; k++)
 		{
-			if(k == p1->cell || k == p1->cell - 18 || k == p1->cell+18)
+			if(k == p1->cell || k == p1->cell - 36 || k == p1->cell+36)
 			{
 				for (int l = k-1; l <k+2; l++)
 				{
-					if(l<360 && l>=0)
+					if(l<1440 && l>=0)
 					{
 					for(int j = 0; j < PG1->size(l); j++)
 					{
@@ -348,8 +348,8 @@ for(int i = 0; i<810; i++)
 							long double Yij = p1->x_t[1] - (*PG1)[l][j]->x_t[1];
 							long double VXij = p1->velo_t[0] - (*PG1)[l][j]->velo_t[0];
 							long double VYij = p1->velo_t[1] - (*PG1)[l][j]->velo_t[1];
-							long double T0i_1 = sqrt( pow( p1->x_t[1] + 1, 2) )/h;
-							long double T0i_2 = sqrt( pow( p1->x_t[1] - 1, 2) )/h;
+							long double T0i_1 = sqrt( pow( p1->x_t[1] + r_0, 2) )/h;
+							long double T0i_2 = sqrt( pow( p1->x_t[1] - r_0, 2) )/h;
 
 							A =
 							//Pressure
@@ -365,7 +365,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 							//Boundaries y over pressure
 
-							if( p1->cell_y <20 )
+							if( p1->cell_y <40 )
 								{
 								A = A
 								//Density boundary over y
@@ -398,7 +398,7 @@ for(int i = 0; i<810; i++)
 							+ D2_Gauss_Kernel( Xij, Yij, h ) / ( distance*distance ) ) );
 
 
-							if( p1->cell_y <20 )
+							if( p1->cell_y <40 )
 								{
 								B = B
 								//Pressure boundary over y
@@ -422,7 +422,7 @@ for(int i = 0; i<810; i++)
 					}
 				}
 			}
-		p1->a_t[0]=(A+0.001);
+		p1->a_t[0]=(A+(2*mu*v_0/(r_0*r_0)));
 		p1->a_t[1]=(B);
 		p1->x_t[0]=(p1->x_t[0] + p1->velo_t[0]*dt);
 		p1->x_t[1]=(p1->x_t[1] + p1->velo_t[1]*dt);

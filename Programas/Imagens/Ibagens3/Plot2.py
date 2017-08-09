@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 print("Rodando")
-data='/home/francisco/Documents/IC-master/Programas/Imagens/Ibagens3/myfile10.txt"
+data='myfile10.txt'
 f=open(data)
 linha=[]
 grosso=[]
@@ -41,20 +41,20 @@ for i in range(col):
 print(col)
 
 
-plt.ylim([0,3])
-plt.xlim([-1,1])
-plt.ylabel('Densidade (Rho)')
+plt.ylim([-0.005,0.005])
+plt.xlim([0,0.005*1.8])
+plt.ylabel('y')
 plt.xlabel('x')
 plt.title('t='+str(1499*0.01)+'s')
-plt.plot(x[1499],y[1499],'o')
+plt.plot(x[99],y[99],'o')
 #plt.hist(x[29])
 plt.savefig('t=3000')
 plt.clf()
 for i in range(col):
     #plt.hist(x[i])
-    plt.ylim([0,4])
-    plt.xlim([-2,2])
-    plt.ylabel('Densidade (Rho)')
+    plt.ylim([-0.005,0.005])
+    plt.xlim([0,0.005*1.8])
+    plt.ylabel('y')
     plt.xlabel('x')
     plt.title('t='+str(i*0.01)+'s')
     plt.plot(x[i],y[i],'o')
@@ -71,7 +71,5 @@ for i in range(col):
                     plt.savefig('imagem'+str(i))
 
     plt.clf()
-
-
 
 f.close()
